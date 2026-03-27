@@ -16,14 +16,8 @@
       --shadow-soft: rgba(0,0,0,0.22);
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      height: 100%;
-    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
 
     body {
       font-family:
@@ -58,7 +52,7 @@
       object-fit: cover;
       filter: blur(34px) brightness(0.78) saturate(1.08);
       transform: scale(1.1);
-      transition: opacity 400ms ease;
+      transition: opacity 300ms ease;
     }
 
     .wallpaper::after {
@@ -85,18 +79,18 @@
     }
 
     .container {
-      width: 880px;
-      max-width: 880px;
+      width: 960px;
+      max-width: 960px;
       display: grid;
-      grid-template-columns: 400px 400px;
+      grid-template-columns: 440px 440px;
       gap: 80px;
       align-items: center;
       justify-content: center;
     }
 
     .art-wrap {
-      width: 400px;
-      height: 400px;
+      width: 440px;
+      height: 440px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -109,12 +103,12 @@
       border-radius: 24px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.46);
       background: rgba(255,255,255,0.06);
-      transition: opacity 400ms ease;
+      transition: opacity 300ms ease;
     }
 
     .text {
-      width: 400px;
-      height: 400px;
+      width: 440px;
+      height: 440px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -132,14 +126,12 @@
     }
 
     .r2 {
-      font-size: 70px;
+      font-size: 72px;
       font-weight: 800;
       letter-spacing: -0.05em;
       line-height: 0.92;
       color: var(--text);
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
+      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
     }
 
     .track-meta {
@@ -147,7 +139,7 @@
       flex-direction: column;
       gap: 6px;
       width: 100%;
-      max-width: 400px;
+      max-width: 440px;
     }
 
     .artist {
@@ -155,9 +147,7 @@
       font-weight: 600;
       letter-spacing: -0.01em;
       color: var(--text-soft);
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
+      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
     }
 
     .title {
@@ -166,9 +156,7 @@
       line-height: 1.1;
       letter-spacing: -0.03em;
       color: var(--text);
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
+      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
       overflow-wrap: anywhere;
     }
 
@@ -176,7 +164,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 12px;
+      gap: 16px;
       width: 100%;
     }
 
@@ -204,11 +192,8 @@
       letter-spacing: 0.25em;
       color: var(--accent);
       text-transform: uppercase;
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
-      opacity: 1;
-      transition: opacity 180ms ease, color 180ms ease;
+      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      transition: color 180ms ease, opacity 180ms ease;
     }
 
     .live-button.paused .live-label {
@@ -230,10 +215,10 @@
       animation: liveWave 1s infinite ease-in-out;
       box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
       transform-origin: bottom center;
-      transition: background-color 180ms ease;
+      transition: background-color 180ms ease, opacity 180ms ease;
     }
 
-    .live-waves span:nth-child(1) { height: 9px; animation-delay: 0s; }
+    .live-waves span:nth-child(1) { height: 9px;  animation-delay: 0s; }
     .live-waves span:nth-child(2) { height: 18px; animation-delay: 0.15s; }
     .live-waves span:nth-child(3) { height: 12px; animation-delay: 0.3s; }
     .live-waves span:nth-child(4) { height: 21px; animation-delay: 0.45s; }
@@ -248,47 +233,63 @@
       50% { transform: scaleY(1.4); opacity: 1; }
     }
 
-    .listeners {
-      display: inline-flex;
+    .listeners-row {
+      display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      color: var(--text-soft);
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
-      opacity: 0.95;
+      gap: 14px;
+      margin-top: 4px;
     }
 
     .listeners-label {
+      font-size: 24px;
+      font-weight: 600;
       color: var(--text-soft);
-      font-weight: 500;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
     }
 
     .listeners-count {
-      min-width: 2ch;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
       color: var(--text);
+      min-width: 3ch;
       font-variant-numeric: tabular-nums;
+      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
     }
 
     .listeners-trend {
-      min-width: 1ch;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
       color: var(--accent);
-      text-align: center;
+      min-width: 1ch;
+      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
     }
 
-    audio {
-      display: none;
+    .listeners-chart {
+      width: 180px;
+      height: 42px;
+      overflow: visible;
     }
 
-    @media (max-width: 600px) {
-      body {
-        overflow: auto;
-      }
+    .listeners-baseline {
+      fill: none;
+      stroke: rgba(255,255,255,0.14);
+      stroke-width: 1;
+    }
+
+    .listeners-line {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    audio { display: none; }
+
+    @media (max-width: 700px) {
+      body { overflow: auto; }
 
       .app {
         height: auto;
@@ -298,27 +299,24 @@
 
       .container {
         width: 100%;
-        max-width: 400px;
+        max-width: 440px;
         grid-template-columns: 1fr;
         gap: 40px;
         text-align: center;
       }
 
-      .art-wrap,
-      .text {
+      .art-wrap, .text {
         width: 100%;
         height: auto;
       }
 
-      .text,
-      .top-block,
-      .bottom-block,
-      .track-meta {
+      .text, .top-block, .bottom-block, .track-meta {
         align-items: center;
       }
 
-      .title {
-        max-width: 100%;
+      .listeners-row {
+        flex-wrap: wrap;
+        justify-content: center;
       }
     }
   </style>
@@ -346,21 +344,22 @@
         </div>
 
         <div class="bottom-block">
-          <button id="liveBtn" class="live-button" type="button" aria-label="Käivita või peata striim">
+          <button id="liveBtn" class="live-button paused" type="button" aria-label="Käivita või peata striim">
             <span class="live-label">LIVE</span>
             <span class="live-waves" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
+              <span></span><span></span><span></span><span></span><span></span>
             </span>
           </button>
 
-          <div class="listeners">
+          <div class="listeners-row">
             <span class="listeners-label">Kuulajaid:</span>
-            <span id="listeners" class="listeners-count">–</span>
-            <span id="trend" class="listeners-trend">→</span>
+            <span id="listenersCount" class="listeners-count">–</span>
+            <span id="listenersTrend" class="listeners-trend">→</span>
+
+            <svg class="listeners-chart" viewBox="0 0 180 42" aria-hidden="true">
+              <path class="listeners-baseline" d="M 0 36 L 180 36"></path>
+              <path id="listenersPath" class="listeners-line" d="M 0 30 L 16 28 L 32 29 L 48 24 L 64 26 L 80 20 L 96 22 L 112 19 L 128 17 L 144 21 L 160 18 L 180 16"></path>
+            </svg>
           </div>
         </div>
       </div>
@@ -370,18 +369,19 @@
   <audio id="audio" playsinline></audio>
 
   <script>
+    const FALLBACK = "/images/r2.png";
     const audio = document.getElementById("audio");
     const liveBtn = document.getElementById("liveBtn");
     const artEl = document.getElementById("art");
     const bgEl = document.getElementById("bg");
     const artistEl = document.getElementById("artist");
     const titleEl = document.getElementById("title");
-    const listenersEl = document.getElementById("listeners");
-    const trendEl = document.getElementById("trend");
+    const listenersCountEl = document.getElementById("listenersCount");
+    const listenersTrendEl = document.getElementById("listenersTrend");
+    const listenersPathEl = document.getElementById("listenersPath");
 
     let lastListeners = null;
     let currentArtwork = null;
-    const FALLBACK = "/images/r2.png";
 
     function setTheme({ text, textSoft, accent, shadowStrong, shadowSoft }) {
       const root = document.documentElement;
@@ -482,13 +482,11 @@
 
         if (!count) throw new Error("No readable pixels");
 
-        const theme = pickTheme(
+        setTheme(pickTheme(
           Math.round(r / count),
           Math.round(g / count),
           Math.round(b / count)
-        );
-
-        setTheme(theme);
+        ));
       } catch {
         setTheme({
           text: "#ffffff",
@@ -522,21 +520,24 @@
       }
     }
 
-    liveBtn.addEventListener("click", async () => {
-      try {
-        if (!audio.src) {
-          audio.src = "https://icecast.err.ee/raadio2.mp3";
-        }
+    function buildLinePath(values, width, height, padding = 4) {
+      if (!Array.isArray(values) || values.length < 2) return "";
 
-        if (audio.paused) {
-          await audio.play();
-        } else {
-          audio.pause();
-        }
-      } catch (e) {
-        console.log("live button error", e);
-      }
-    });
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const range = Math.max(max - min, 1);
+
+      return values.map((v, i) => {
+        const x = (i / (values.length - 1)) * width;
+        const y = height - padding - ((v - min) / range) * (height - padding * 2);
+        return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+      }).join(" ");
+    }
+
+    function makeFallbackHistory(current) {
+      const base = Number(current || 0);
+      return [base - 4, base - 2, base - 3, base, base - 1, base + 2, base + 1, base + 3, base + 2, base + 4, base + 3, base + 5];
+    }
 
     function parseTrack(data) {
       const rawArtist = data.artist || "";
@@ -560,23 +561,54 @@
       };
     }
 
-    function updateListeners(nextValue) {
-      const next = Number(nextValue || 0);
+    function updateListeners(data) {
+      const next = Number(data.listeners || 0);
 
       if (lastListeners === null) {
-        listenersEl.textContent = next;
-        trendEl.textContent = "→";
-        lastListeners = next;
-        return;
+        listenersCountEl.textContent = next;
+        listenersTrendEl.textContent = "→";
+      } else if (next > lastListeners) {
+        listenersTrendEl.textContent = "↑";
+      } else if (next < lastListeners) {
+        listenersTrendEl.textContent = "↓";
+      } else {
+        listenersTrendEl.textContent = "→";
       }
 
-      if (next > lastListeners) trendEl.textContent = "↑";
-      else if (next < lastListeners) trendEl.textContent = "↓";
-      else trendEl.textContent = "→";
-
-      listenersEl.textContent = next;
+      listenersCountEl.textContent = next;
       lastListeners = next;
+
+      const history = Array.isArray(data.listenersHistory) && data.listenersHistory.length >= 2
+        ? data.listenersHistory
+        : makeFallbackHistory(next);
+
+      listenersPathEl.setAttribute("d", buildLinePath(history, 180, 42));
     }
+
+    function updateLiveState() {
+      liveBtn.classList.toggle("paused", audio.paused);
+    }
+
+    liveBtn.addEventListener("click", async () => {
+      try {
+        if (!audio.src) {
+          audio.src = "https://icecast.err.ee/raadio2.mp3";
+        }
+
+        if (audio.paused) {
+          await audio.play();
+        } else {
+          audio.pause();
+        }
+
+        updateLiveState();
+      } catch (e) {
+        console.log("live button error", e);
+      }
+    });
+
+    audio.addEventListener("play", updateLiveState);
+    audio.addEventListener("pause", updateLiveState);
 
     async function update() {
       try {
@@ -587,10 +619,7 @@
         artistEl.textContent = track.artist;
         titleEl.textContent = track.title;
 
-        const isNews =
-          track.title === "Uudised" ||
-          track.artist === "Uudised";
-
+        const isNews = track.title === "Uudised" || track.artist === "Uudised";
         const artworkToUse = isNews ? FALLBACK : (data.artwork || FALLBACK);
 
         await updateArtwork(artworkToUse);
@@ -599,12 +628,13 @@
           applyNewsTheme();
         }
 
-        updateListeners(data.listeners);
+        updateListeners(data);
       } catch (e) {
         console.log("update error", e);
       }
     }
 
+    updateLiveState();
     update();
     setInterval(update, 5000);
   </script>
