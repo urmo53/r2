@@ -18,13 +18,13 @@ const VIEWERS_URL =
   "https://otse.err.ee/api/currentViewers/getChannelViewers?channel=raadio2";
 const ICECAST_URL = "https://icecast.err.ee/status-json.xsl";
 
-// ===== STATE =====
-
-let samples = []; // {ts, value}
-let r2ImageCache = { value: null, fetchedAt: 0 };
 const artworkCache = new Map();
+let r2ImageCache = { value: null, fetchedAt: 0 };
 
-// ===== HELPERS =====
+// iga sample: { ts: unix_ms, value: number }
+let samples = [];
+
+// ---------- Helpers ----------
 
 function cleanTitle(raw) {
   return String(raw || "")
@@ -52,27 +52,33 @@ function getTrackMeta(rawTitle) {
   let artist = "Raadio 2";
 
   if (hasTrackSeparator(title)) {
-    const p = parseTrack(title);
-    artist = p.artist || "Raadio 2";
-    title = p.song || title;
+    const parsed = parseTrack(title);
+    artist = parsed.artist || "Raadio 2";
+    title = parsed.song || title;
   }
 
   return { artist, title };
 }
 
-// ===== LISTENERS =====
+function isExactNews(artist, title) {
+  return artist?.trim() === "Uudised" || title?.trim() === "Uudised";
+}
+
+// ---------- Listeners ----------
 
 async function fetchListeners() {
   const res = await axios.get(VIEWERS_URL, {
     timeout: 8000,
     headers: {
-      "Cache-Control": "no-cache",
       "User-Agent": "Mozilla/5.0",
+      "Accept": "text/plain,application/json,*/*",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache",
     },
   });
 
-  const val = parseInt(String(res.data).trim(), 10);
-  return Number.isFinite(val) ? val : 0;
+  const value = Number.parseInt(String(res.data).trim(), 10);
+  return Number.isFinite(value) ? value : 0;
 }
 
 function addSample(value) {
@@ -81,51 +87,83 @@ function addSample(value) {
 
   samples.push({ ts: now, value });
   samples = samples.filter((s) => s.ts >= hourAgo);
+
+  if (samples.length > 1000) {
+    samples = samples.slice(-1000);
+  }
 }
 
-function buildHistory(current) {
+function buildHistory(currentValue) {
   const now = Date.now();
-  const step = 5 * 60 * 1000;
-
+  const step = 5 * 60 * 1000; // 5 min
   const result = [];
 
   for (let i = 11; i >= 0; i--) {
-    const t = now - i * step;
+    const targetTime = now - i * step;
 
     let found = null;
     for (let j = samples.length - 1; j >= 0; j--) {
-      if (samples[j].ts <= t) {
+      if (samples[j].ts <= targetTime) {
         found = samples[j].value;
         break;
       }
     }
 
     if (found === null) {
-      found = samples[0]?.value ?? current;
+      found = samples[0]?.value ?? currentValue;
     }
 
     result.push(found);
   }
 
-  result[result.length - 1] = current;
+  result[result.length - 1] = currentValue;
   return result;
 }
 
-// ===== ARTWORK =====
+function getTrendForLastMinute(currentValue) {
+  const now = Date.now();
+  const oneMinuteAgo = now - 60 * 1000;
+
+  let reference = null;
+
+  for (let i = samples.length - 1; i >= 0; i--) {
+    if (samples[i].ts <= oneMinuteAgo) {
+      reference = samples[i].value;
+      break;
+    }
+  }
+
+  if (reference === null) {
+    reference = samples[0]?.value ?? currentValue;
+  }
+
+  if (currentValue > reference) return "up";
+  if (currentValue < reference) return "down";
+  return "flat";
+}
+
+// ---------- Artwork ----------
 
 async function getITunes(track) {
-  const key = "itunes:" + track;
-  if (artworkCache.has(key)) return artworkCache.get(key);
+  const key = `itunes:${track}`;
+  if (artworkCache.has(key)) {
+    return artworkCache.get(key);
+  }
 
   try {
     const { artist, song } = parseTrack(track);
-    if (!artist || !song) return null;
+    const term = `${artist} ${song}`.trim();
+    if (!term || !artist || !song) {
+      artworkCache.set(key, null);
+      return null;
+    }
 
-    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
-      artist + " " + song
-    )}&media=music&entity=song&limit=1`;
-
-    const res = await axios.get(url, { timeout: 8000 });
+    const res = await axios.get(
+      `https://itunes.apple.com/search?term=${encodeURIComponent(
+        term
+      )}&media=music&entity=song&limit=3`,
+      { timeout: 8000 }
+    );
 
     const art =
       res.data?.results?.[0]?.artworkUrl100?.replace("100x100", "600x600") ||
@@ -134,38 +172,45 @@ async function getITunes(track) {
     artworkCache.set(key, art);
     return art;
   } catch {
+    artworkCache.set(key, null);
     return null;
   }
 }
 
 async function getDeezer(track) {
-  const key = "deezer:" + track;
-  if (artworkCache.has(key)) return artworkCache.get(key);
+  const key = `deezer:${track}`;
+  if (artworkCache.has(key)) {
+    return artworkCache.get(key);
+  }
 
   try {
     const { artist, song } = parseTrack(track);
-    if (!artist || !song) return null;
+    const term = `${artist} ${song}`.trim();
+    if (!term || !artist || !song) {
+      artworkCache.set(key, null);
+      return null;
+    }
 
     const res = await axios.get(
-      `https://api.deezer.com/search?q=${encodeURIComponent(
-        artist + " " + song
-      )}`,
+      `https://api.deezer.com/search?q=${encodeURIComponent(term)}`,
       { timeout: 8000 }
     );
 
     const art =
       res.data?.data?.[0]?.album?.cover_xl ||
       res.data?.data?.[0]?.album?.cover_big ||
+      res.data?.data?.[0]?.album?.cover_medium ||
       null;
 
     artworkCache.set(key, art);
     return art;
   } catch {
+    artworkCache.set(key, null);
     return null;
   }
 }
 
-async function getR2Image() {
+async function getR2WebsiteImage() {
   const now = Date.now();
 
   if (r2ImageCache.value && now - r2ImageCache.fetchedAt < 30000) {
@@ -182,97 +227,153 @@ async function getR2Image() {
 
     let img =
       $(".radio-player-img").attr("src") ||
-      $(".radio-player-img").attr("ng-src");
+      $(".radio-player-img").attr("ng-src") ||
+      null;
 
     if (!img) return null;
+    if (/favicon/i.test(img)) return null;
 
     if (img.startsWith("//")) img = "https:" + img;
     if (img.startsWith("/")) img = "https://r2.err.ee" + img;
 
-    r2ImageCache = { value: img, fetchedAt: now };
+    r2ImageCache = {
+      value: img,
+      fetchedAt: now,
+    };
 
     return img;
-  } catch {
+  } catch (e) {
+    console.log("R2 image error:", e.message);
     return null;
   }
 }
 
-async function getArtwork(title) {
-  const clean = cleanTitle(title);
+async function getArtwork(rawTitle, currentStation) {
+  const normalizedTitle = cleanTitle(rawTitle);
+  const meta = getTrackMeta(normalizedTitle);
 
-  if (clean === "Uudised") {
-    return station.fallbackImage;
+  if (isExactNews(meta.artist, meta.title)) {
+    return currentStation.fallbackImage;
   }
 
-  if (!hasTrackSeparator(clean)) {
-    const r2 = await getR2Image();
-    return r2 || station.fallbackImage;
+  if (currentStation.name === "R2") {
+    if (!hasTrackSeparator(normalizedTitle)) {
+      const r2img = await getR2WebsiteImage();
+      if (r2img) return r2img;
+      return currentStation.fallbackImage;
+    }
+
+    let img = await getITunes(normalizedTitle);
+    if (img) return img;
+
+    img = await getDeezer(normalizedTitle);
+    if (img) return img;
+
+    img = await getR2WebsiteImage();
+    if (img) return img;
+
+    return currentStation.fallbackImage;
   }
 
-  let art = await getITunes(clean);
-  if (art) return art;
+  let img = await getITunes(normalizedTitle);
+  if (img) return img;
 
-  art = await getDeezer(clean);
-  if (art) return art;
+  img = await getDeezer(normalizedTitle);
+  if (img) return img;
 
-  art = await getR2Image();
-  if (art) return art;
-
-  return station.fallbackImage;
+  return currentStation.fallbackImage;
 }
 
-// ===== API =====
+// ---------- Track source ----------
 
-app.get("/api/station", async (req, res) => {
+async function fetchStationData() {
+  const [ice, listeners] = await Promise.all([
+    axios.get(ICECAST_URL, { timeout: 8000 }),
+    fetchListeners(),
+  ]);
+
+  addSample(listeners);
+
+  const sources = Array.isArray(ice.data?.icestats?.source)
+    ? ice.data.icestats.source
+    : [ice.data?.icestats?.source].filter(Boolean);
+
+  const fileName = station.stream.split("/").pop().toLowerCase();
+
+  const src =
+    sources.find((x) =>
+      (x.listenurl || "").toLowerCase().includes(fileName)
+    ) ||
+    sources.find((x) =>
+      (x.listenurl || "").toLowerCase().includes("raadio2.mp3")
+    ) ||
+    sources.find((x) =>
+      String(x.server_name || "").toLowerCase().includes("raadio 2")
+    ) ||
+    sources.find((x) =>
+      String(x.server_description || "").toLowerCase().includes("raadio 2")
+    );
+
+  const rawTitle =
+    src?.title && String(src.title).trim()
+      ? String(src.title).trim()
+      : "Hetkel mitte saadaval";
+
+  const artwork = await getArtwork(rawTitle, station);
+  const meta = getTrackMeta(rawTitle);
+
+  return {
+    name: station.name,
+    stream: station.stream,
+    artist: meta.artist,
+    title: meta.title,
+    artwork,
+    listeners,
+    listenersHistory: buildHistory(listeners),
+    listenersTrend1m: getTrendForLastMinute(listeners),
+  };
+}
+
+// ---------- API ----------
+
+app.get("/api/station", async (_req, res) => {
   try {
-    const [ice, listeners] = await Promise.all([
-      axios.get(ICECAST_URL, { timeout: 8000 }),
-      fetchListeners(),
-    ]);
-
-    addSample(listeners);
-
-    const sources = Array.isArray(ice.data?.icestats?.source)
-      ? ice.data.icestats.source
-      : [ice.data?.icestats?.source].filter(Boolean);
-
-    const src =
-      sources.find((x) =>
-        (x.listenurl || "").includes("raadio2.mp3")
-      ) || sources[0];
-
-    const rawTitle = src?.title || "R2";
-
-    const artwork = await getArtwork(rawTitle);
-    const meta = getTrackMeta(rawTitle);
+    const data = await fetchStationData();
 
     res.set({
-      "Cache-Control": "no-store",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
       "Pragma": "no-cache",
       "Expires": "0",
       "Surrogate-Control": "no-store",
     });
 
-    res.json({
-      name: station.name,
-      stream: station.stream,
-      artist: meta.artist,
-      title: meta.title,
-      artwork,
-      listeners,
-      listenersHistory: buildHistory(listeners),
-    });
-  } catch (e) {
-    console.log("API error:", e.message);
+    res.json(data);
+  } catch (err) {
+    console.log("API error:", err.message);
 
-    res.json({
+    const lastKnown = samples[samples.length - 1]?.value || 0;
+    const fallbackHistory =
+      samples.length > 0
+        ? buildHistory(lastKnown)
+        : Array(12).fill(0);
+
+    res.set({
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "Surrogate-Control": "no-store",
+    });
+
+    res.status(200).json({
+      error: "Viga",
       name: station.name,
       stream: station.stream,
       artist: "Raadio 2",
-      title: "—",
+      title: "Hetkel eetris....",
       artwork: station.fallbackImage,
-      listeners: 0,
-      listenersHistory: Array(12).fill(0),
+      listeners: lastKnown,
+      listenersHistory: fallbackHistory,
+      listenersTrend1m: "flat",
     });
   }
 });

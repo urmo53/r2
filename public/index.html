@@ -16,8 +16,14 @@
       --shadow-soft: rgba(0,0,0,0.22);
     }
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
 
     body {
       font-family:
@@ -50,7 +56,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: blur(41px) brightness(0.78) saturate(1.18);
+      filter: blur(39px) brightness(0.78) saturate(1.08) contrast(1.05);
       transform: scale(1.1);
       transition: opacity 300ms ease;
     }
@@ -131,7 +137,9 @@
       letter-spacing: -0.05em;
       line-height: 0.92;
       color: var(--text);
-      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
     }
 
     .track-meta {
@@ -147,7 +155,9 @@
       font-weight: 600;
       letter-spacing: -0.01em;
       color: var(--text-soft);
-      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
     }
 
     .title {
@@ -156,7 +166,9 @@
       line-height: 1.1;
       letter-spacing: -0.03em;
       color: var(--text);
-      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
       overflow-wrap: anywhere;
     }
 
@@ -192,7 +204,9 @@
       letter-spacing: 0.25em;
       color: var(--accent);
       text-transform: uppercase;
-      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
       transition: color 180ms ease, opacity 180ms ease;
     }
 
@@ -246,7 +260,9 @@
       color: var(--text-soft);
       letter-spacing: -0.02em;
       white-space: nowrap;
-      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
     }
 
     .listeners-count {
@@ -255,7 +271,9 @@
       color: var(--text);
       min-width: 3ch;
       font-variant-numeric: tabular-nums;
-      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
     }
 
     .listeners-trend {
@@ -263,7 +281,9 @@
       font-weight: 800;
       color: var(--accent);
       min-width: 1ch;
-      text-shadow: 0 3px 18px var(--shadow-strong), 0 1px 2px var(--shadow-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
     }
 
     .listeners-chart {
@@ -286,10 +306,14 @@
       stroke-linejoin: round;
     }
 
-    audio { display: none; }
+    audio {
+      display: none;
+    }
 
     @media (max-width: 700px) {
-      body { overflow: auto; }
+      body {
+        overflow: auto;
+      }
 
       .app {
         height: auto;
@@ -305,12 +329,16 @@
         text-align: center;
       }
 
-      .art-wrap, .text {
+      .art-wrap,
+      .text {
         width: 100%;
         height: auto;
       }
 
-      .text, .top-block, .bottom-block, .track-meta {
+      .text,
+      .top-block,
+      .bottom-block,
+      .track-meta {
         align-items: center;
       }
 
@@ -358,7 +386,7 @@
 
             <svg class="listeners-chart" viewBox="0 0 180 42" aria-hidden="true">
               <path class="listeners-baseline" d="M 0 36 L 180 36"></path>
-              <path id="listenersPath" class="listeners-line" d="M 0 30 L 16 28 L 32 29 L 48 24 L 64 26 L 80 20 L 96 22 L 112 19 L 128 17 L 144 21 L 160 18 L 180 16"></path>
+              <path id="listenersPath" class="listeners-line" d=""></path>
             </svg>
           </div>
         </div>
@@ -380,7 +408,6 @@
     const listenersTrendEl = document.getElementById("listenersTrend");
     const listenersPathEl = document.getElementById("listenersPath");
 
-    let lastListeners = null;
     let currentArtwork = null;
 
     function setTheme({ text, textSoft, accent, shadowStrong, shadowSoft }) {
@@ -534,11 +561,6 @@
       }).join(" ");
     }
 
-    function makeFallbackHistory(current) {
-      const base = Number(current || 0);
-      return [base - 4, base - 2, base - 3, base, base - 1, base + 2, base + 1, base + 3, base + 2, base + 4, base + 3, base + 5];
-    }
-
     function parseTrack(data) {
       const rawArtist = data.artist || "";
       const rawTitle = data.title || "";
@@ -563,25 +585,18 @@
 
     function updateListeners(data) {
       const next = Number(data.listeners || 0);
+      listenersCountEl.textContent = next;
 
-      if (lastListeners === null) {
-        listenersCountEl.textContent = next;
-        listenersTrendEl.textContent = "→";
-      } else if (next > lastListeners) {
+      const trend = data.listenersTrend1m || "flat";
+      if (trend === "up") {
         listenersTrendEl.textContent = "↑";
-      } else if (next < lastListeners) {
+      } else if (trend === "down") {
         listenersTrendEl.textContent = "↓";
       } else {
         listenersTrendEl.textContent = "→";
       }
 
-      listenersCountEl.textContent = next;
-      lastListeners = next;
-
-      const history = Array.isArray(data.listenersHistory) && data.listenersHistory.length >= 2
-        ? data.listenersHistory
-        : makeFallbackHistory(next);
-
+      const history = Array.isArray(data.listenersHistory) ? data.listenersHistory : [];
       listenersPathEl.setAttribute("d", buildLinePath(history, 180, 42));
     }
 
@@ -612,12 +627,20 @@
 
     async function update() {
       try {
-        const res = await fetch("/api/station", { cache: "no-store" });
+        const res = await fetch("/api/station", {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache"
+          }
+        });
+
         const data = await res.json();
         const track = parseTrack(data);
 
         artistEl.textContent = track.artist;
         titleEl.textContent = track.title;
+
+        updateListeners(data);
 
         const isNews = track.title === "Uudised" || track.artist === "Uudised";
         const artworkToUse = isNews ? FALLBACK : (data.artwork || FALLBACK);
@@ -627,8 +650,6 @@
         if (isNews) {
           applyNewsTheme();
         }
-
-        updateListeners(data);
       } catch (e) {
         console.log("update error", e);
       }
