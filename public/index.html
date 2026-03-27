@@ -392,6 +392,16 @@
       root.style.setProperty("--shadow-soft", shadowSoft);
     }
 
+    function applyNewsTheme() {
+      setTheme({
+        text: "#ffffff",
+        textSoft: "rgba(255,255,255,0.78)",
+        accent: "#ff3b30",
+        shadowStrong: "rgba(0,0,0,0.46)",
+        shadowSoft: "rgba(0,0,0,0.22)"
+      });
+    }
+
     function pickTheme(r, g, b) {
       const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
       const isLight = luminance > 0.68;
@@ -577,7 +587,18 @@
         artistEl.textContent = track.artist;
         titleEl.textContent = track.title;
 
-        await updateArtwork(data.artwork);
+        const isNews =
+          track.title === "Uudised" ||
+          track.artist === "Uudised";
+
+        const artworkToUse = isNews ? FALLBACK : (data.artwork || FALLBACK);
+
+        await updateArtwork(artworkToUse);
+
+        if (isNews) {
+          applyNewsTheme();
+        }
+
         updateListeners(data.listeners);
       } catch (e) {
         console.log("update error", e);
