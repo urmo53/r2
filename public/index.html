@@ -90,10 +90,11 @@
       align-items: center;
       justify-content: center;
       padding: 40px;
+      overflow: hidden;
     }
 
     .container {
-      width: 100%;
+      width: 1120px;
       max-width: 1120px;
       margin: 0 auto;
       display: grid;
@@ -106,7 +107,8 @@
     .art-stage {
       perspective: 1200px;
       width: 480px;
-      max-width: 100%;
+      max-width: 480px;
+      flex-shrink: 0;
       justify-self: center;
     }
 
@@ -151,18 +153,22 @@
     .art-front { opacity: 0; }
 
     .text {
-      width: 480px;
-      max-width: 100%;
-      min-height: 480px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      transform: translateY(50px);
-      align-items: flex-start;
-      justify-self: center;
-      padding-bottom: 34px;
-    }
+  width: 480px;
+  max-width: 480px;
+  height: 480px; /* sama mis artwork */
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 🔥 oluline */
+
+  padding-top: 10%;   /* 🔥 10% ülevalt */
+  padding-bottom: 10%; /* 🔥 10% alt */
+
+  gap: 16px;
+  align-items: flex-start;
+  justify-self: center;
+}
 
     .live-row {
       display: flex;
@@ -300,7 +306,7 @@
     .listeners-inline {
       position: absolute;
       left: 0;
-      bottom: 80px;
+      bottom: 0;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -350,7 +356,8 @@
       display: none;
     }
 
-    @media (max-width: 1100px) {
+    /* Mobile fallback alles väga väiksel ekraanil */
+    @media (max-width: 600px) {
       body {
         overflow: auto;
       }
@@ -362,6 +369,7 @@
       }
 
       .container {
+        width: 100%;
         max-width: 480px;
         grid-template-columns: 1fr;
         justify-content: center;
@@ -372,6 +380,7 @@
       .art-stage,
       .text {
         width: 100%;
+        max-width: 100%;
       }
 
       .art-stage {
@@ -381,7 +390,6 @@
       .text {
         min-height: auto;
         align-items: center;
-        transform: translateY(0);
         padding-bottom: 0;
       }
 
@@ -396,7 +404,7 @@
 
       .listeners-inline {
         position: static;
-        margin-top: 10px;
+        margin-top: -50px;
       }
     }
   </style>
