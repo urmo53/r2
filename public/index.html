@@ -14,8 +14,6 @@
       --accent: #58a6ff;
       --shadow-strong: rgba(0,0,0,0.42);
       --shadow-soft: rgba(0,0,0,0.22);
-      --art-x: 0px;
-      --art-y: 0px;
     }
 
     * {
@@ -54,20 +52,13 @@
       background: #000;
     }
 
-    .bg-layer {
-      position: absolute;
-      inset: 0;
+    .wallpaper img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       filter: blur(34px) brightness(0.78) saturate(1.08);
       transform: scale(1.1);
-      transition: opacity 700ms ease;
-      will-change: opacity;
     }
-
-    .bg-back { opacity: 1; }
-    .bg-front { opacity: 0; }
 
     .wallpaper::after {
       content: "";
@@ -90,128 +81,56 @@
       align-items: center;
       justify-content: center;
       padding: 40px;
-      overflow: hidden;
     }
 
     .container {
       width: 880px;
       max-width: 880px;
-      margin: 0 auto;
       display: grid;
       grid-template-columns: 400px 400px;
-      justify-content: center;
       gap: 80px;
       align-items: center;
-    }
-
-    .art-stage {
-      perspective: 1200px;
-      width: 400px;
-      max-width: 400px;
-      flex-shrink: 0;
-      justify-self: center;
+      justify-content: center;
     }
 
     .art-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      transform:
-        rotateY(calc(var(--art-x) * 0.8))
-        rotateX(calc(var(--art-y) * -0.8))
-        translate3d(calc(var(--art-x) * 0.35), calc(var(--art-y) * 0.35), 0);
-      transition: transform 180ms ease-out;
-      will-change: transform;
-    }
-
-    .art-glow {
-      position: absolute;
-      inset: 6%;
-      border-radius: 28px;
-      background:
-        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 62%);
-      filter: blur(22px);
-      opacity: 0.95;
-      transform: translate3d(calc(var(--art-x) * 0.2), calc(var(--art-y) * 0.2), 0);
-      pointer-events: none;
+      width: 400px;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .art {
-      position: absolute;
-      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
       border-radius: 24px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.46);
-      transition: opacity 700ms ease;
-      will-change: opacity;
       background: rgba(255,255,255,0.06);
     }
 
-    .art-back { opacity: 1; }
-    .art-front { opacity: 0; }
-
     .text {
       width: 400px;
-      max-width: 400px;
       height: 400px;
-      position: relative;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       padding-top: 10%;
       padding-bottom: 10%;
-      gap: 16px;
       align-items: flex-start;
-      justify-self: center;
     }
 
-    .live-row {
+    .top-block {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 2px;
-    }
-
-    .live-label {
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.22em;
-      color: var(--accent);
-      text-transform: uppercase;
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
-    }
-
-    .live-waves {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      height: 16px;
-    }
-
-    .live-waves span {
-      width: 3px;
-      border-radius: 999px;
-      background: var(--accent);
-      animation: liveWave 1s infinite ease-in-out;
-      box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
-    }
-
-    .live-waves span:nth-child(1) { height: 6px; animation-delay: 0s; }
-    .live-waves span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
-    .live-waves span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
-    .live-waves span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
-
-    @keyframes liveWave {
-      0%, 100% { transform: scaleY(0.6); opacity: 0.6; }
-      50% { transform: scaleY(1.4); opacity: 1; }
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+      width: 100%;
     }
 
     .r2 {
-      font-size: 76px;
+      font-size: 70px;
       font-weight: 800;
       letter-spacing: -0.05em;
       line-height: 0.92;
@@ -225,11 +144,12 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      width: 100%;
       max-width: 400px;
     }
 
     .artist {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       letter-spacing: -0.01em;
       color: var(--text-soft);
@@ -239,11 +159,10 @@
     }
 
     .title {
-      font-size: 34px;
+      font-size: 30px;
       font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.035em;
-      max-width: 400px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
       color: var(--text);
       text-shadow:
         0 3px 18px var(--shadow-strong),
@@ -251,59 +170,72 @@
       overflow-wrap: anywhere;
     }
 
-    .controls {
+    .bottom-block {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 10px;
-      margin-top: 8px;
+      gap: 12px;
+      width: 100%;
     }
 
-    .play-btn {
-      width: 72px;
-      height: 72px;
+    .live-button {
+      appearance: none;
       border: none;
-      border-radius: 50%;
+      background: transparent;
+      padding: 0;
+      margin: 0;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      background: var(--accent);
-      color: #ffffff;
+      gap: 14px;
       cursor: pointer;
-      box-shadow:
-        0 10px 30px rgba(0,0,0,0.28),
-        0 4px 12px rgba(0,0,0,0.18);
-      transition:
-        transform 160ms ease,
-        opacity 160ms ease,
-        background-color 180ms ease;
-      padding: 0;
     }
 
-    .play-btn:hover {
-      transform: scale(1.04);
-    }
-
-    .play-btn:active {
-      transform: scale(0.96);
-    }
-
-    .play-btn:focus-visible {
+    .live-button:focus-visible {
       outline: 3px solid rgba(255,255,255,0.72);
-      outline-offset: 4px;
+      outline-offset: 6px;
+      border-radius: 8px;
     }
 
-    .play-icon {
-      font-size: 28px;
-      line-height: 1;
-      transform: translateX(1px);
-      user-select: none;
+    .live-label {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
     }
 
-    .listeners-inline {
-      position: absolute;
-      left: 0;
-      bottom: 0;
+    .live-waves {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      height: 24px;
+    }
+
+    .live-waves span {
+      display: inline-block;
+      width: 4.5px;
+      border-radius: 999px;
+      background: var(--accent);
+      animation: liveWave 1s infinite ease-in-out;
+      box-shadow: 0 0 8px rgba(88, 166, 255, 0.35);
+      transform-origin: bottom center;
+    }
+
+    .live-waves span:nth-child(1) { height: 9px; animation-delay: 0s; }
+    .live-waves span:nth-child(2) { height: 18px; animation-delay: 0.15s; }
+    .live-waves span:nth-child(3) { height: 12px; animation-delay: 0.3s; }
+    .live-waves span:nth-child(4) { height: 21px; animation-delay: 0.45s; }
+    .live-waves span:nth-child(5) { height: 14px; animation-delay: 0.6s; }
+
+    @keyframes liveWave {
+      0%, 100% { transform: scaleY(0.6); opacity: 0.6; }
+      50% { transform: scaleY(1.4); opacity: 1; }
+    }
+
+    .listeners {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -315,22 +247,10 @@
         0 3px 18px var(--shadow-strong),
         0 1px 2px var(--shadow-soft);
       opacity: 0.95;
-      transform-origin: left center;
-    }
-
-    .listeners-inline.pulse {
-      animation: listenersPulse 420ms ease;
-    }
-
-    @keyframes listenersPulse {
-      0% { transform: scale(1); opacity: 0.88; }
-      45% { transform: scale(1.06); opacity: 1; }
-      100% { transform: scale(1); opacity: 0.95; }
     }
 
     .listeners-label {
       color: var(--text-soft);
-      opacity: 0.9;
       font-weight: 500;
     }
 
@@ -339,7 +259,6 @@
       font-weight: 700;
       color: var(--text);
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.015em;
     }
 
     .listeners-trend {
@@ -368,39 +287,25 @@
         width: 100%;
         max-width: 400px;
         grid-template-columns: 1fr;
-        justify-content: center;
         gap: 40px;
         text-align: center;
       }
 
-      .art-stage,
+      .art-wrap,
       .text {
         width: 100%;
-        max-width: 100%;
-      }
-
-      .art-stage {
-        margin: 0 auto;
-      }
-
-      .text {
-        min-height: auto;
         height: auto;
+      }
+
+      .text,
+      .top-block,
+      .bottom-block,
+      .track-meta {
         align-items: center;
       }
 
-      .track-meta,
       .title {
         max-width: 100%;
-      }
-
-      .controls {
-        align-items: center;
-      }
-
-      .listeners-inline {
-        position: static;
-        margin-top: -50px;
       }
     }
   </style>
@@ -408,237 +313,78 @@
 
 <body>
   <div class="wallpaper">
-    <img id="bgBack" class="bg-layer bg-back" src="/images/r2.png" alt="">
-    <img id="bgFront" class="bg-layer bg-front" src="/images/r2.png" alt="">
+    <img id="bg" src="/images/r2.png" alt="">
   </div>
 
   <div class="app">
     <div class="container">
-      <div class="art-stage" id="artStage">
-        <div class="art-wrap">
-          <div class="art-glow"></div>
-          <img id="artBack" class="art art-back" src="/images/r2.png" alt="R2 artwork">
-          <img id="artFront" class="art art-front" src="/images/r2.png" alt="R2 artwork">
-        </div>
+      <div class="art-wrap">
+        <img id="art" class="art" src="/images/r2.png" alt="R2 artwork">
       </div>
 
       <div class="text">
-        <div class="live-row">
-          <div class="live-label">LIVE</div>
-          <div class="live-waves" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
+        <div class="top-block">
+          <div class="r2">R2</div>
+
+          <div class="track-meta">
+            <div id="artist" class="artist">Raadio 2</div>
+            <div id="title" class="title">Laadimine...</div>
           </div>
         </div>
 
-        <div class="r2">R2</div>
-
-        <div class="track-meta">
-          <div id="artist" class="artist">Raadio 2</div>
-          <div id="title" class="title">Laadimine...</div>
-        </div>
-
-        <div class="controls">
-          <button id="playBtn" class="play-btn" aria-label="Play või paus">
-            <span id="playIcon" class="play-icon">▶</span>
+        <div class="bottom-block">
+          <button id="liveBtn" class="live-button" type="button" aria-label="Käivita või peata striim">
+            <span class="live-label">LIVE</span>
+            <span class="live-waves" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
           </button>
-        </div>
 
-        <div id="listenersInline" class="listeners-inline" aria-live="polite">
-          <span class="listeners-label">Kuulajaid:</span>
-          <span id="listenersCount" class="listeners-count">–</span>
-          <span id="listenersTrend" class="listeners-trend">→</span>
+          <div class="listeners">
+            <span class="listeners-label">Kuulajaid:</span>
+            <span id="listeners" class="listeners-count">–</span>
+            <span id="trend" class="listeners-trend">→</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <audio id="audio" crossorigin="anonymous" playsinline></audio>
+  <audio id="audio" playsinline></audio>
 
   <script>
-    const FALLBACK = "/images/r2.png";
-    const DEFAULT_STREAM = "https://icecast.err.ee/raadio2.mp3";
-
-    let currentArtwork = null;
-    let currentThemeKey = null;
-    let displayedListeners = null;
-    let actualListeners = null;
-    let listenersAnimFrame = null;
-
-    const titleEl = document.getElementById("title");
+    const audio = document.getElementById("audio");
+    const liveBtn = document.getElementById("liveBtn");
+    const artEl = document.getElementById("art");
+    const bgEl = document.getElementById("bg");
     const artistEl = document.getElementById("artist");
-    const artBack = document.getElementById("artBack");
-    const artFront = document.getElementById("artFront");
-    const bgBack = document.getElementById("bgBack");
-    const bgFront = document.getElementById("bgFront");
-    const audioEl = document.getElementById("audio");
-    const playBtn = document.getElementById("playBtn");
-    const playIcon = document.getElementById("playIcon");
-    const artStage = document.getElementById("artStage");
-    const listenersInline = document.getElementById("listenersInline");
-    const listenersCountEl = document.getElementById("listenersCount");
-    const listenersTrendEl = document.getElementById("listenersTrend");
+    const titleEl = document.getElementById("title");
+    const listenersEl = document.getElementById("listeners");
+    const trendEl = document.getElementById("trend");
 
-    function setTheme({ text, textSoft, accent, shadowStrong, shadowSoft }) {
-      const root = document.documentElement;
-      root.style.setProperty("--text", text);
-      root.style.setProperty("--text-soft", textSoft);
-      root.style.setProperty("--accent", accent);
-      root.style.setProperty("--shadow-strong", shadowStrong);
-      root.style.setProperty("--shadow-soft", shadowSoft);
-    }
+    let lastListeners = null;
 
-    function pickTheme(r, g, b) {
-      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      const isLight = luminance > 0.68;
-
-      if (isLight) {
-        return {
-          key: "light",
-          text: "#111111",
-          textSoft: "rgba(17,17,17,0.76)",
-          accent: "#111111",
-          shadowStrong: "rgba(255,255,255,0.16)",
-          shadowSoft: "rgba(255,255,255,0.08)"
-        };
-      }
-
-      const max = Math.max(r, g, b);
-
-      if (max === r) {
-        return {
-          key: "dark-red",
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#ff5a6b",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
-        };
-      }
-
-      if (max === g) {
-        return {
-          key: "dark-green",
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#42d66f",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
-        };
-      }
-
-      return {
-        key: "dark-blue",
-        text: "#ffffff",
-        textSoft: "rgba(255,255,255,0.72)",
-        accent: "#58a6ff",
-        shadowStrong: "rgba(0,0,0,0.46)",
-        shadowSoft: "rgba(0,0,0,0.22)"
-      };
-    }
-
-    async function preloadImage(src) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    function sampleThemeFromImage(imgEl) {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      const w = 24;
-      const h = 24;
-
-      canvas.width = w;
-      canvas.height = h;
-      ctx.drawImage(imgEl, 0, 0, w, h);
-
-      const { data } = ctx.getImageData(0, 0, w, h);
-      let r = 0, g = 0, b = 0, count = 0;
-
-      for (let i = 0; i < data.length; i += 4) {
-        const alpha = data[i + 3];
-        if (alpha < 120) continue;
-        r += data[i];
-        g += data[i + 1];
-        b += data[i + 2];
-        count++;
-      }
-
-      if (!count) {
-        return {
-          key: "fallback",
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#58a6ff",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
-        };
-      }
-
-      return pickTheme(
-        Math.round(r / count),
-        Math.round(g / count),
-        Math.round(b / count)
-      );
-    }
-
-    function applyThemeOnce(theme) {
-      if (!theme || theme.key === currentThemeKey) return;
-      currentThemeKey = theme.key;
-      setTheme(theme);
-    }
-
-    function crossfadeImage(frontEl, backEl, src) {
-      if (!src) return;
-      if (backEl.src === src || frontEl.src === src) return;
-
-      frontEl.onload = () => {
-        frontEl.style.opacity = "1";
-        setTimeout(() => {
-          backEl.src = src;
-          frontEl.style.opacity = "0";
-        }, 700);
-      };
-
-      frontEl.src = src;
-    }
-
-    async function updateArtwork(src) {
-      if (!src || src === currentArtwork) return;
-      currentArtwork = src;
-
-      crossfadeImage(artFront, artBack, src);
-      crossfadeImage(bgFront, bgBack, src);
-
+    liveBtn.addEventListener("click", async () => {
       try {
-        const themeImg = await preloadImage(src);
-        const theme = sampleThemeFromImage(themeImg);
-        applyThemeOnce(theme);
-      } catch {
-        applyThemeOnce({
-          key: "fallback",
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#58a6ff",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
-        });
+        if (!audio.src) {
+          audio.src = "https://icecast.err.ee/raadio2.mp3";
+        }
+
+        if (audio.paused) {
+          await audio.play();
+        } else {
+          audio.pause();
+        }
+      } catch (e) {
+        console.log("live button error", e);
       }
-    }
+    });
 
-    function updatePlayIcon() {
-      playIcon.textContent = audioEl.paused ? "▶" : "⏸";
-      playIcon.style.transform = audioEl.paused ? "translateX(1px)" : "translateX(0)";
-    }
-
-    function parseTrackInfo(data) {
+    function parseTrack(data) {
       const rawArtist = data.artist || "";
       const rawTitle = data.title || "";
 
@@ -660,103 +406,36 @@
       };
     }
 
-    function animateListeners(from, to, duration = 700) {
-      if (listenersAnimFrame) {
-        cancelAnimationFrame(listenersAnimFrame);
-      }
-
-      const start = performance.now();
-      const diff = to - from;
-
-      function easeOutCubic(t) {
-        return 1 - Math.pow(1 - t, 3);
-      }
-
-      function frame(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        const eased = easeOutCubic(progress);
-        const value = Math.round(from + diff * eased);
-
-        listenersCountEl.textContent = value;
-
-        if (progress < 1) {
-          listenersAnimFrame = requestAnimationFrame(frame);
-        } else {
-          displayedListeners = to;
-          listenersCountEl.textContent = to;
-          listenersAnimFrame = null;
-        }
-      }
-
-      listenersAnimFrame = requestAnimationFrame(frame);
-    }
-
     function updateListeners(nextValue) {
       const next = Number(nextValue || 0);
 
-      if (actualListeners === null) {
-        actualListeners = next;
-        displayedListeners = next;
-        listenersCountEl.textContent = next;
-        listenersTrendEl.textContent = "→";
+      if (lastListeners === null) {
+        listenersEl.textContent = next;
+        trendEl.textContent = "→";
+        lastListeners = next;
         return;
       }
 
-      if (next === actualListeners) {
-        listenersTrendEl.textContent = "→";
-        return;
-      }
+      if (next > lastListeners) trendEl.textContent = "↑";
+      else if (next < lastListeners) trendEl.textContent = "↓";
+      else trendEl.textContent = "→";
 
-      listenersTrendEl.textContent = next > actualListeners ? "↑" : "↓";
-
-      listenersInline.classList.remove("pulse");
-      void listenersInline.offsetWidth;
-      listenersInline.classList.add("pulse");
-
-      const startFrom = displayedListeners ?? actualListeners ?? next;
-      actualListeners = next;
-      animateListeners(startFrom, next, 750);
+      listenersEl.textContent = next;
+      lastListeners = next;
     }
-
-    playBtn.addEventListener("click", async () => {
-      try {
-        if (!audioEl.src) {
-          audioEl.src = DEFAULT_STREAM;
-        }
-
-        if (audioEl.paused) {
-          await audioEl.play();
-        } else {
-          audioEl.pause();
-        }
-
-        updatePlayIcon();
-      } catch (e) {
-        console.log("play error", e);
-      }
-    });
-
-    audioEl.addEventListener("play", updatePlayIcon);
-    audioEl.addEventListener("pause", updatePlayIcon);
 
     async function update() {
       try {
         const res = await fetch("/api/station", { cache: "no-store" });
         const data = await res.json();
-
-        const art = data.artwork || FALLBACK;
-        const stream = data.stream || DEFAULT_STREAM;
-        const track = parseTrackInfo(data);
+        const track = parseTrack(data);
 
         artistEl.textContent = track.artist;
         titleEl.textContent = track.title;
 
-        if (art !== currentArtwork) {
-          await updateArtwork(art);
-        }
-
-        if (!audioEl.src) {
-          audioEl.src = stream;
+        if (data.artwork) {
+          artEl.src = data.artwork;
+          bgEl.src = data.artwork;
         }
 
         updateListeners(data.listeners);
@@ -765,25 +444,6 @@
       }
     }
 
-    function setParallax(x, y) {
-      document.documentElement.style.setProperty("--art-x", `${x}px`);
-      document.documentElement.style.setProperty("--art-y", `${y}px`);
-    }
-
-    function resetParallax() {
-      setParallax(0, 0);
-    }
-
-    artStage.addEventListener("mousemove", (e) => {
-      const rect = artStage.getBoundingClientRect();
-      const relX = (e.clientX - rect.left) / rect.width - 0.5;
-      const relY = (e.clientY - rect.top) / rect.height - 0.5;
-      setParallax(relX * 16, relY * 16);
-    });
-
-    artStage.addEventListener("mouseleave", resetParallax);
-
-    updatePlayIcon();
     update();
     setInterval(update, 5000);
   </script>
