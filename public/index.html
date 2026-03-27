@@ -94,11 +94,11 @@
     }
 
     .container {
-      width: 1120px;
-      max-width: 1120px;
+      width: 880px;
+      max-width: 880px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 480px 480px;
+      grid-template-columns: 400px 400px;
       justify-content: center;
       gap: 80px;
       align-items: center;
@@ -106,8 +106,8 @@
 
     .art-stage {
       perspective: 1200px;
-      width: 480px;
-      max-width: 480px;
+      width: 400px;
+      max-width: 400px;
       flex-shrink: 0;
       justify-self: center;
     }
@@ -153,22 +153,19 @@
     .art-front { opacity: 0; }
 
     .text {
-  width: 480px;
-  max-width: 480px;
-  height: 480px; /* sama mis artwork */
-
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* 🔥 oluline */
-
-  padding-top: 10%;   /* 🔥 10% ülevalt */
-  padding-bottom: 10%; /* 🔥 10% alt */
-
-  gap: 16px;
-  align-items: flex-start;
-  justify-self: center;
-}
+      width: 400px;
+      max-width: 400px;
+      height: 400px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-top: 10%;
+      padding-bottom: 10%;
+      gap: 16px;
+      align-items: flex-start;
+      justify-self: center;
+    }
 
     .live-row {
       display: flex;
@@ -228,7 +225,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      max-width: 480px;
+      max-width: 400px;
     }
 
     .artist {
@@ -246,7 +243,7 @@
       font-weight: 800;
       line-height: 1.08;
       letter-spacing: -0.035em;
-      max-width: 480px;
+      max-width: 400px;
       color: var(--text);
       text-shadow:
         0 3px 18px var(--shadow-strong),
@@ -356,7 +353,6 @@
       display: none;
     }
 
-    /* Mobile fallback alles väga väiksel ekraanil */
     @media (max-width: 600px) {
       body {
         overflow: auto;
@@ -370,7 +366,7 @@
 
       .container {
         width: 100%;
-        max-width: 480px;
+        max-width: 400px;
         grid-template-columns: 1fr;
         justify-content: center;
         gap: 40px;
@@ -389,8 +385,8 @@
 
       .text {
         min-height: auto;
+        height: auto;
         align-items: center;
-        padding-bottom: 0;
       }
 
       .track-meta,
