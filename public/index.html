@@ -254,15 +254,22 @@
       margin-top: 4px;
     }
 
-    .listeners-label {
-      font-size: 24px;
-      font-weight: 600;
+    .listeners-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       color: var(--text-soft);
-      letter-spacing: -0.02em;
-      white-space: nowrap;
+      opacity: 0.92;
+      line-height: 1;
+      flex-shrink: 0;
       text-shadow:
         0 3px 18px var(--shadow-strong),
         0 1px 2px var(--shadow-soft);
+    }
+
+    .r2-listeners-icon svg {
+      display: block;
+      overflow: visible;
     }
 
     .listeners-count {
@@ -380,7 +387,18 @@
           </button>
 
           <div class="listeners-row">
-            <span class="listeners-label">Kuulajaid:</span>
+            <span class="listeners-icon r2-listeners-icon" aria-label="Kuulajad">
+              <svg viewBox="0 0 28 20" width="24" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="9" cy="6" r="2.6" stroke="currentColor" stroke-width="1.8"/>
+                <circle cx="19" cy="6" r="2.6" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M4.8 15.2c.6-2.3 2.5-3.8 4.2-3.8s3.6 1.5 4.2 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M14.8 15.2c.6-2.3 2.5-3.8 4.2-3.8s3.6 1.5 4.2 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M14 4.2v7.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity="0.9"/>
+                <path d="M14 12.8c1.3 0 2.3 1 2.3 2.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.75"/>
+                <path d="M14 12.8c-1.3 0-2.3 1-2.3 2.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.75"/>
+              </svg>
+            </span>
+
             <span id="listenersCount" class="listeners-count">–</span>
             <span id="listenersTrend" class="listeners-trend">→</span>
 
