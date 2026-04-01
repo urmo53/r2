@@ -20,11 +20,7 @@ const ICECAST_URL = "https://icecast.err.ee/status-json.xsl";
 
 const artworkCache = new Map();
 let r2ImageCache = { value: null, fetchedAt: 0 };
-
-// iga sample: { ts: unix_ms, value: number }
 let samples = [];
-
-// ---------- Helpers ----------
 
 function cleanTitle(raw) {
   return String(raw || "")
@@ -64,8 +60,6 @@ function isExactNews(artist, title) {
   return artist?.trim() === "Uudised" || title?.trim() === "Uudised";
 }
 
-// ---------- Listeners ----------
-
 async function fetchListeners() {
   const res = await axios.get(VIEWERS_URL, {
     timeout: 8000,
@@ -95,7 +89,7 @@ function addSample(value) {
 
 function buildHistory(currentValue) {
   const now = Date.now();
-  const step = 5 * 60 * 1000; // 5 min
+  const step = 5 * 60 * 1000;
   const result = [];
 
   for (let i = 11; i >= 0; i--) {
@@ -141,8 +135,6 @@ function getTrendForLastMinute(currentValue) {
   if (currentValue < reference) return "down";
   return "flat";
 }
-
-// ---------- Artwork ----------
 
 async function getITunes(track) {
   const key = `itunes:${track}`;
@@ -284,8 +276,6 @@ async function getArtwork(rawTitle, currentStation) {
   return currentStation.fallbackImage;
 }
 
-// ---------- Track source ----------
-
 async function fetchStationData() {
   const [ice, listeners] = await Promise.all([
     axios.get(ICECAST_URL, { timeout: 8000 }),
@@ -333,8 +323,6 @@ async function fetchStationData() {
     listenersTrend1m: getTrendForLastMinute(listeners),
   };
 }
-
-// ---------- API ----------
 
 app.get("/api/station", async (_req, res) => {
   try {
