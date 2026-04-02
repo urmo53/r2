@@ -17,15 +17,31 @@ const station = {
 const VIEWERS_URL =
   "https://otse.err.ee/api/currentViewers/getChannelViewers?channel=raadio2";
 const ICECAST_URL = "https://icecast.err.ee/status-json.xsl";
+const R2_URL = "https://r2.err.ee";
 
 const artworkCache = new Map();
-let r2ImageCache = { value: null, fetchedAt: 0 };
+let r2PageCache = {
+  image: null,
+  showHeading: null,
+  fetchedAt: 0,
+};
+
 let samples = [];
+
+// ---------- text helpers ----------
 
 function cleanTitle(raw) {
   return String(raw || "")
     .replace(/–|—/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function cleanSearchTitle(raw) {
+  return String(raw || "")
+    .replace(/–|—/g, "-")
     .replace(/\(.*?\)|\[.*?\]/g, "")
+    .replace(/[|–—]/g, "-")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -35,11 +51,11 @@ function hasTrackSeparator(title) {
 }
 
 function parseTrack(title) {
-  const cleaned = cleanTitle(title);
+  const cleaned = cleanSearchTitle(title);
   const parts = cleaned.split(" - ");
   return {
     artist: parts[0] || "",
-    song: parts.slice(1).join(" ") || "",
+    song: parts.slice(1).join(" - ") || "",
   };
 }
 
@@ -59,6 +75,16 @@ function getTrackMeta(rawTitle) {
 function isExactNews(artist, title) {
   return artist?.trim() === "Uudised" || title?.trim() === "Uudised";
 }
+
+function normalizeCompareText(str) {
+  return String(str || "")
+    .replace(/–|—/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+// ---------- listeners ----------
 
 async function fetchListeners() {
   const res = await axios.get(VIEWERS_URL, {
@@ -136,24 +162,145 @@ function getTrendForLastMinute(currentValue) {
   return "flat";
 }
 
-async function getITunes(track) {
-  const key = `itunes:${track}`;
-  if (artworkCache.has(key)) {
-    return artworkCache.get(key);
+// ---------- R2 page data ----------
+
+async function getR2PageData() {
+  const now = Date.now();
+
+  if (now - r2PageCache.fetchedAt < 30000) {
+    return r2PageCache;
   }
 
   try {
-    const { artist, song } = parseTrack(track);
-    const term = `${artist} ${song}`.trim();
-    if (!term || !artist || !song) {
-      artworkCache.set(key, null);
+    const res = await axios.get(R2_URL, {
+      timeout: 8000,
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+
+    const $ = cheerio.load(res.data);
+
+    let image =
+      $(".radio-player-img").attr("src") ||
+      $(".radio-player-img").attr("ng-src") ||
+      null;
+
+    let showHeading =
+      $(".radio-player-show-heading").text().trim() ||
+      $(".radio-player-show-heading").attr("ng-bind") ||
+      null;
+
+    if (!showHeading) {
+      // fallback – proovi hetkel eetris lähedalt mõni pealkiri kätte saada
+      const currentOnAirText = $("body").text();
+      if (currentOnAirText.includes("HETKEL EETRIS")) {
+        // jätame nulliks kui kindlat elementi ei saa
+        showHeading = null;
+      }
+    }
+
+    if (image) {
+      if (/favicon/i.test(image)) {
+        image = null;
+      } else if (image.startsWith("//")) {
+        image = "https:" + image;
+      } else if (image.startsWith("/")) {
+        image = R2_URL + image;
+      }
+    }
+
+    r2PageCache = {
+      image: image || null,
+      showHeading: showHeading || null,
+      fetchedAt: now,
+    };
+
+    return r2PageCache;
+  } catch (e) {
+    console.log("R2 page data error:", e.message);
+    return r2PageCache;
+  }
+}
+
+// ---------- artwork search variants ----------
+
+function buildSearchVariants(rawTitle) {
+  const variants = [];
+  const seen = new Set();
+
+  function push(v) {
+    const value = cleanSearchTitle(v);
+    if (!value) return;
+    const key = value.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    variants.push(value);
+  }
+
+  const original = cleanSearchTitle(rawTitle);
+  push(original);
+
+  // normalized variant
+  let normalized = original
+    .replace(/\s+[xX]\s+/g, " & ")
+    .replace(/[’']/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+  push(normalized);
+
+  if (hasTrackSeparator(original)) {
+    const parsed = parseTrack(original);
+    const artist = parsed.artist.trim();
+    const song = parsed.song.trim();
+
+    if (artist && song) {
+      // artist + title
+      push(`${artist} - ${song}`);
+
+      // normalize X -> &
+      push(`${artist.replace(/\s+[xX]\s+/g, " & ")} - ${song}`);
+
+      // title + artist
+      push(`${song} - ${artist}`);
+
+      // plain search strings
+      push(`${artist} ${song}`);
+      push(`${song} ${artist}`);
+
+      // primary artist only (before &, feat, x, comma)
+      const primaryArtist = artist
+        .split(/\s+(?:&|feat\.?|ft\.?|x|,)\s+/i)[0]
+        .trim();
+
+      if (primaryArtist && primaryArtist !== artist) {
+        push(`${primaryArtist} - ${song}`);
+        push(`${primaryArtist} ${song}`);
+        push(`${song} ${primaryArtist}`);
+      }
+    }
+  }
+
+  return variants;
+}
+
+// ---------- artwork providers ----------
+
+async function searchITunesByVariant(variant) {
+  const cacheKey = `itunes:${variant}`;
+  if (artworkCache.has(cacheKey)) {
+    return artworkCache.get(cacheKey);
+  }
+
+  try {
+    const term = variant.replace(/\s-\s/g, " ").trim();
+    if (!term) {
+      artworkCache.set(cacheKey, null);
       return null;
     }
 
     const res = await axios.get(
       `https://itunes.apple.com/search?term=${encodeURIComponent(
         term
-      )}&media=music&entity=song&limit=3`,
+      )}&media=music&entity=song&limit=5`,
       { timeout: 8000 }
     );
 
@@ -161,25 +308,24 @@ async function getITunes(track) {
       res.data?.results?.[0]?.artworkUrl100?.replace("100x100", "600x600") ||
       null;
 
-    artworkCache.set(key, art);
+    artworkCache.set(cacheKey, art);
     return art;
   } catch {
-    artworkCache.set(key, null);
+    artworkCache.set(cacheKey, null);
     return null;
   }
 }
 
-async function getDeezer(track) {
-  const key = `deezer:${track}`;
-  if (artworkCache.has(key)) {
-    return artworkCache.get(key);
+async function searchDeezerByVariant(variant) {
+  const cacheKey = `deezer:${variant}`;
+  if (artworkCache.has(cacheKey)) {
+    return artworkCache.get(cacheKey);
   }
 
   try {
-    const { artist, song } = parseTrack(track);
-    const term = `${artist} ${song}`.trim();
-    if (!term || !artist || !song) {
-      artworkCache.set(key, null);
+    const term = variant.replace(/\s-\s/g, " ").trim();
+    if (!term) {
+      artworkCache.set(cacheKey, null);
       return null;
     }
 
@@ -194,87 +340,51 @@ async function getDeezer(track) {
       res.data?.data?.[0]?.album?.cover_medium ||
       null;
 
-    artworkCache.set(key, art);
+    artworkCache.set(cacheKey, art);
     return art;
   } catch {
-    artworkCache.set(key, null);
-    return null;
-  }
-}
-
-async function getR2WebsiteImage() {
-  const now = Date.now();
-
-  if (r2ImageCache.value && now - r2ImageCache.fetchedAt < 30000) {
-    return r2ImageCache.value;
-  }
-
-  try {
-    const res = await axios.get("https://r2.err.ee", {
-      timeout: 8000,
-      headers: { "User-Agent": "Mozilla/5.0" },
-    });
-
-    const $ = cheerio.load(res.data);
-
-    let img =
-      $(".radio-player-img").attr("src") ||
-      $(".radio-player-img").attr("ng-src") ||
-      null;
-
-    if (!img) return null;
-    if (/favicon/i.test(img)) return null;
-
-    if (img.startsWith("//")) img = "https:" + img;
-    if (img.startsWith("/")) img = "https://r2.err.ee" + img;
-
-    r2ImageCache = {
-      value: img,
-      fetchedAt: now,
-    };
-
-    return img;
-  } catch (e) {
-    console.log("R2 image error:", e.message);
+    artworkCache.set(cacheKey, null);
     return null;
   }
 }
 
 async function getArtwork(rawTitle, currentStation) {
-  const normalizedTitle = cleanTitle(rawTitle);
-  const meta = getTrackMeta(normalizedTitle);
+  const meta = getTrackMeta(rawTitle);
 
   if (isExactNews(meta.artist, meta.title)) {
     return currentStation.fallbackImage;
   }
 
-  if (currentStation.name === "R2") {
-    if (!hasTrackSeparator(normalizedTitle)) {
-      const r2img = await getR2WebsiteImage();
-      if (r2img) return r2img;
-      return currentStation.fallbackImage;
-    }
+  const r2Page = await getR2PageData();
+  const icecastTitleNorm = normalizeCompareText(rawTitle);
+  const showHeadingNorm = normalizeCompareText(r2Page.showHeading);
 
-    let img = await getITunes(normalizedTitle);
-    if (img) return img;
-
-    img = await getDeezer(normalizedTitle);
-    if (img) return img;
-
-    img = await getR2WebsiteImage();
-    if (img) return img;
-
-    return currentStation.fallbackImage;
+  // Kui Icecast title == R2 lehe show heading -> saade, kasuta kohe R2 pilti
+  if (showHeadingNorm && icecastTitleNorm === showHeadingNorm) {
+    return r2Page.image || currentStation.fallbackImage;
   }
 
-  let img = await getITunes(normalizedTitle);
-  if (img) return img;
+  // Kui pole klassikaline artist - title formaat, kasuta samuti R2 pilti
+  if (!hasTrackSeparator(rawTitle)) {
+    return r2Page.image || currentStation.fallbackImage;
+  }
 
-  img = await getDeezer(normalizedTitle);
-  if (img) return img;
+  const variants = buildSearchVariants(rawTitle);
 
-  return currentStation.fallbackImage;
+  for (const variant of variants) {
+    const art = await searchITunesByVariant(variant);
+    if (art) return art;
+  }
+
+  for (const variant of variants) {
+    const art = await searchDeezerByVariant(variant);
+    if (art) return art;
+  }
+
+  return r2Page.image || currentStation.fallbackImage;
 }
+
+// ---------- station data ----------
 
 async function fetchStationData() {
   const [ice, listeners] = await Promise.all([
