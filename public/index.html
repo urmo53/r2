@@ -12,8 +12,11 @@
       --text: #ffffff;
       --text-soft: rgba(255,255,255,0.72);
       --accent: #58a6ff;
+      --accent-rgb: 88, 166, 255;
       --shadow-strong: rgba(0,0,0,0.42);
       --shadow-soft: rgba(0,0,0,0.22);
+      --glow: rgba(88,166,255,0.12);
+      --bg-brightness: 0.78;
     }
 
     * {
@@ -56,9 +59,13 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: blur(39px) brightness(0.78) saturate(1.08) contrast(1.05);
-      transform: scale(1.1);
-      transition: opacity 300ms ease;
+      filter: blur(22px) brightness(var(--bg-brightness)) saturate(1.04) contrast(1.03);
+      transform: scale(1.12);
+      transition:
+        opacity 700ms ease,
+        transform 900ms cubic-bezier(.22,.61,.36,1),
+        filter 1000ms ease;
+      will-change: transform, opacity, filter;
     }
 
     .wallpaper::after {
@@ -72,6 +79,18 @@
           rgba(0,0,0,0.08) 38%,
           rgba(0,0,0,0.18) 100%
         );
+    }
+
+    .wallpaper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 35% 50%, var(--glow) 0%, transparent 38%),
+        radial-gradient(circle at 70% 52%, rgba(var(--accent-rgb), 0.06) 0%, transparent 32%);
+      opacity: 1;
+      transition: background 500ms ease, opacity 300ms ease;
+      pointer-events: none;
     }
 
     .app {
@@ -100,6 +119,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+    }
+
+    .art-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -16px;
+      border-radius: 34px;
+      background: radial-gradient(circle at center, var(--glow) 0%, transparent 65%);
+      filter: blur(20px);
+      opacity: 0.9;
+      transition: background 400ms ease, opacity 300ms ease;
+      pointer-events: none;
     }
 
     .art {
@@ -107,9 +139,37 @@
       height: 100%;
       object-fit: cover;
       border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.46);
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.46),
+        0 0 0 1px rgba(255,255,255,0.05),
+        0 0 24px rgba(var(--accent-rgb), 0.12);
       background: rgba(255,255,255,0.06);
-      transition: opacity 300ms ease;
+      transition:
+        opacity 620ms ease,
+        transform 900ms cubic-bezier(.22,.61,.36,1),
+        box-shadow 500ms ease;
+      transform: scale(1);
+      will-change: transform, opacity;
+    }
+
+    .art.bump {
+      animation: artBump 650ms cubic-bezier(.22,.61,.36,1);
+    }
+
+    @keyframes artBump {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.028); }
+      100% { transform: scale(1); }
+    }
+
+    .art.is-swapping {
+      opacity: 0.8;
+      transform: scale(1.02);
+    }
+
+    .wallpaper img.is-swapping {
+      opacity: 0.88;
+      transform: scale(1.14);
     }
 
     .text {
@@ -150,6 +210,25 @@
       max-width: 440px;
     }
 
+    .artist,
+    .title {
+      transition:
+        opacity 240ms ease,
+        transform 240ms ease,
+        color 240ms ease;
+    }
+
+    .track-meta.bump .artist,
+    .track-meta.bump .title {
+      animation: metaSwap 520ms ease;
+    }
+
+    @keyframes metaSwap {
+      0%   { opacity: 0.58; transform: translateY(4px); }
+      45%  { opacity: 1; transform: translateY(0); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
     .artist {
       font-size: 16px;
       font-weight: 600;
@@ -170,6 +249,48 @@
         0 3px 18px var(--shadow-strong),
         0 1px 2px var(--shadow-soft);
       overflow-wrap: anywhere;
+    }
+
+    .now-playing-line {
+      width: 100%;
+      max-width: 314px;
+      height: 2px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      overflow: hidden;
+      margin-top: 8px;
+      position: relative;
+    }
+
+    .now-playing-line::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.02) 0%,
+        rgba(255,255,255,0.08) 50%,
+        rgba(255,255,255,0.02) 100%
+      );
+    }
+
+    .now-playing-line-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 36%;
+      border-radius: inherit;
+      background: linear-gradient(
+        90deg,
+        rgba(var(--accent-rgb), 0.18) 0%,
+        rgba(var(--accent-rgb), 0.95) 55%,
+        rgba(var(--accent-rgb), 0.18) 100%
+      );
+      box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.28);
+      transform: translateX(0);
+      will-change: transform;
     }
 
     .bottom-block {
@@ -198,6 +319,31 @@
       border-radius: 8px;
     }
 
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.55);
+      animation: liveDotPulse 1.8s infinite ease-out;
+      flex: 0 0 auto;
+    }
+
+    @keyframes liveDotPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.48);
+        opacity: 1;
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(var(--accent-rgb), 0);
+        opacity: 0.95;
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+        opacity: 1;
+      }
+    }
+
     .live-label {
       font-size: 21px;
       font-weight: 700;
@@ -210,7 +356,8 @@
       transition: color 180ms ease, opacity 180ms ease;
     }
 
-    .live-button.paused .live-label {
+    .live-button.paused .live-label,
+    .live-button.paused .live-dot {
       opacity: 0.72;
     }
 
@@ -226,10 +373,10 @@
       width: 4.5px;
       border-radius: 999px;
       background: var(--accent);
-      animation: liveWave 1s infinite ease-in-out;
+      animation: liveWave var(--wave-speed, 1s) infinite ease-in-out;
       box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
       transform-origin: bottom center;
-      transition: background-color 180ms ease, opacity 180ms ease;
+      transition: background-color 180ms ease, opacity 180ms ease, height 300ms ease;
     }
 
     .live-waves span:nth-child(1) { height: 9px;  animation-delay: 0s; }
@@ -243,8 +390,11 @@
     }
 
     @keyframes liveWave {
-      0%, 100% { transform: scaleY(0.6); opacity: 0.6; }
-      50% { transform: scaleY(1.4); opacity: 1; }
+      0%   { transform: scaleY(0.5); opacity: 0.55; }
+      25%  { transform: scaleY(1.2); opacity: 0.9; }
+      50%  { transform: scaleY(1.6); opacity: 1; }
+      75%  { transform: scaleY(0.9); opacity: 0.85; }
+      100% { transform: scaleY(0.6); opacity: 0.6; }
     }
 
     .listeners-row {
@@ -257,7 +407,7 @@
     .listeners-icons {
       display: inline-flex;
       align-items: center;
-      gap: 0px;
+      gap: 0;
       min-width: 24px;
       max-width: 220px;
       overflow: hidden;
@@ -280,11 +430,12 @@
       position: relative;
       width: 14px;
       height: 14px;
-	margin-left: -6px; /* <-- see teeb overlap efekti */
-}
+      margin-left: -6px;
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
 
-.clean-user-icon:first-child {
-  margin-left: 0;
+    .clean-user-icon:first-child {
+      margin-left: 0;
     }
 
     .clean-user-icon svg {
@@ -296,10 +447,12 @@
 
     .clean-user-icon.is-half {
       opacity: 0.45;
+      transform: scale(0.98);
     }
 
     .clean-user-icon.is-full {
       opacity: 1;
+      transform: scale(1);
     }
 
     .listeners-count {
@@ -311,6 +464,16 @@
       text-shadow:
         0 3px 18px var(--shadow-strong),
         0 1px 2px var(--shadow-soft);
+    }
+
+    .listeners-count.flash {
+      animation: countFlash 420ms ease;
+    }
+
+    @keyframes countFlash {
+      0%   { transform: translateY(1px); opacity: 0.75; }
+      50%  { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(0); opacity: 1; }
     }
 
     .listeners-trend {
@@ -341,6 +504,8 @@
       stroke-width: 2.5;
       stroke-linecap: round;
       stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px rgba(var(--accent-rgb), 0.18));
+      transition: stroke 200ms ease;
     }
 
     audio {
@@ -383,6 +548,11 @@
         flex-wrap: wrap;
         justify-content: center;
       }
+
+      .now-playing-line {
+        margin-left: auto;
+        margin-right: auto;
+      }
     }
   </style>
 </head>
@@ -402,14 +572,18 @@
         <div class="top-block">
           <div class="r2">R2</div>
 
-          <div class="track-meta">
+          <div id="trackMeta" class="track-meta">
             <div id="artist" class="artist">Raadio 2</div>
             <div id="title" class="title">Laadimine...</div>
+            <div class="now-playing-line" aria-hidden="true">
+              <div id="nowPlayingFill" class="now-playing-line-fill"></div>
+            </div>
           </div>
         </div>
 
         <div class="bottom-block">
           <button id="liveBtn" class="live-button paused" type="button" aria-label="Käivita või peata striim">
+            <span class="live-dot" aria-hidden="true"></span>
             <span class="live-label">LIVE</span>
             <span class="live-waves" aria-hidden="true">
               <span></span><span></span><span></span><span></span><span></span>
@@ -440,22 +614,32 @@
     const liveBtn = document.getElementById("liveBtn");
     const artEl = document.getElementById("art");
     const bgEl = document.getElementById("bg");
+    const trackMetaEl = document.getElementById("trackMeta");
     const artistEl = document.getElementById("artist");
     const titleEl = document.getElementById("title");
     const listenersIconsEl = document.getElementById("listenersIcons");
     const listenersCountEl = document.getElementById("listenersCount");
     const listenersTrendEl = document.getElementById("listenersTrend");
     const listenersPathEl = document.getElementById("listenersPath");
+    const nowPlayingFillEl = document.getElementById("nowPlayingFill");
 
     let currentArtwork = null;
+    let displayedListeners = 0;
+    let listenersAnimFrame = null;
+    let currentTrackKey = "";
+    let progressAnimFrame = null;
+    let progressDirection = 1;
+    let progressStartAt = performance.now();
 
-    function setTheme({ text, textSoft, accent, shadowStrong, shadowSoft }) {
+    function setTheme({ text, textSoft, accent, accentRgb, shadowStrong, shadowSoft, glow }) {
       const root = document.documentElement;
       root.style.setProperty("--text", text);
       root.style.setProperty("--text-soft", textSoft);
       root.style.setProperty("--accent", accent);
+      root.style.setProperty("--accent-rgb", accentRgb);
       root.style.setProperty("--shadow-strong", shadowStrong);
       root.style.setProperty("--shadow-soft", shadowSoft);
+      root.style.setProperty("--glow", glow);
     }
 
     function applyNewsTheme() {
@@ -463,8 +647,10 @@
         text: "#ffffff",
         textSoft: "rgba(255,255,255,0.78)",
         accent: "#ff3b30",
+        accentRgb: "255, 59, 48",
         shadowStrong: "rgba(0,0,0,0.46)",
-        shadowSoft: "rgba(0,0,0,0.22)"
+        shadowSoft: "rgba(0,0,0,0.22)",
+        glow: "rgba(255,59,48,0.14)"
       });
     }
 
@@ -477,8 +663,10 @@
           text: "#111111",
           textSoft: "rgba(17,17,17,0.76)",
           accent: "#111111",
+          accentRgb: "17, 17, 17",
           shadowStrong: "rgba(255,255,255,0.16)",
-          shadowSoft: "rgba(255,255,255,0.08)"
+          shadowSoft: "rgba(255,255,255,0.08)",
+          glow: "rgba(255,255,255,0.08)"
         };
       }
 
@@ -489,8 +677,10 @@
           text: "#ffffff",
           textSoft: "rgba(255,255,255,0.72)",
           accent: "#ff5a6b",
+          accentRgb: "255, 90, 107",
           shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(255,90,107,0.14)"
         };
       }
 
@@ -499,8 +689,10 @@
           text: "#ffffff",
           textSoft: "rgba(255,255,255,0.72)",
           accent: "#42d66f",
+          accentRgb: "66, 214, 111",
           shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(66,214,111,0.14)"
         };
       }
 
@@ -508,9 +700,19 @@
         text: "#ffffff",
         textSoft: "rgba(255,255,255,0.72)",
         accent: "#58a6ff",
+        accentRgb: "88, 166, 255",
         shadowStrong: "rgba(0,0,0,0.46)",
-        shadowSoft: "rgba(0,0,0,0.22)"
+        shadowSoft: "rgba(0,0,0,0.22)",
+        glow: "rgba(88,166,255,0.12)"
       };
+    }
+
+    function bumpNowPlaying() {
+      artEl.classList.remove("bump");
+      trackMetaEl.classList.remove("bump");
+      void artEl.offsetWidth;
+      artEl.classList.add("bump");
+      trackMetaEl.classList.add("bump");
     }
 
     async function preloadImage(src) {
@@ -558,8 +760,10 @@
           text: "#ffffff",
           textSoft: "rgba(255,255,255,0.72)",
           accent: "#58a6ff",
+          accentRgb: "88, 166, 255",
           shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(88,166,255,0.12)"
         });
       }
     }
@@ -567,23 +771,38 @@
     async function updateArtwork(artwork) {
       const src = artwork || FALLBACK;
       if (src === currentArtwork) return;
-      currentArtwork = src;
 
-      artEl.src = src;
-      bgEl.src = src;
+      artEl.classList.add("is-swapping");
+      bgEl.classList.add("is-swapping");
 
       try {
         const img = await preloadImage(src);
+
+        currentArtwork = src;
+        artEl.src = src;
+        bgEl.src = src;
+
         applyThemeFromImage(img);
       } catch {
+        currentArtwork = src;
+        artEl.src = src;
+        bgEl.src = src;
+
         setTheme({
           text: "#ffffff",
           textSoft: "rgba(255,255,255,0.72)",
           accent: "#58a6ff",
+          accentRgb: "88, 166, 255",
           shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)"
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(88,166,255,0.12)"
         });
       }
+
+      setTimeout(() => {
+        artEl.classList.remove("is-swapping");
+        bgEl.classList.remove("is-swapping");
+      }, 700);
     }
 
     function buildLinePath(values, width, height, padding = 4) {
@@ -669,11 +888,51 @@
       listenersIconsEl.innerHTML = html;
     }
 
+    function animateListenersTo(target) {
+      const start = displayedListeners;
+      const end = Number(target || 0);
+
+      if (listenersAnimFrame) {
+        cancelAnimationFrame(listenersAnimFrame);
+      }
+
+      if (start === end) {
+        listenersCountEl.textContent = end;
+        renderListenerIcons(end);
+        return;
+      }
+
+      const duration = 520;
+      const startTime = performance.now();
+
+      listenersCountEl.classList.remove("flash");
+      void listenersCountEl.offsetWidth;
+      listenersCountEl.classList.add("flash");
+
+      function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (end - start) * eased);
+
+        displayedListeners = current;
+        listenersCountEl.textContent = current;
+        renderListenerIcons(current);
+
+        if (progress < 1) {
+          listenersAnimFrame = requestAnimationFrame(step);
+        } else {
+          displayedListeners = end;
+          listenersCountEl.textContent = end;
+          renderListenerIcons(end);
+        }
+      }
+
+      listenersAnimFrame = requestAnimationFrame(step);
+    }
+
     function updateListeners(data) {
       const next = Number(data.listeners || 0);
-      listenersCountEl.textContent = next;
-
-      renderListenerIcons(next);
+      animateListenersTo(next);
 
       const trend = data.listenersTrend1m || "flat";
       if (trend === "up") {
@@ -690,6 +949,83 @@
 
     function updateLiveState() {
       liveBtn.classList.toggle("paused", audio.paused);
+    }
+
+    function startBackgroundPulse() {
+      function tick() {
+        const t = performance.now() / 1000;
+        const brightness = 0.78 + (Math.sin(t * 0.10) * 0.016) + (Math.sin(t * 0.035) * 0.008);
+        document.documentElement.style.setProperty("--bg-brightness", brightness.toFixed(3));
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    function resetProgressLine() {
+      progressDirection = 1;
+      progressStartAt = performance.now();
+
+      nowPlayingFillEl.style.transition = "transform 220ms ease-out";
+      nowPlayingFillEl.style.transform = "translateX(-6%)";
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          nowPlayingFillEl.style.transition = "";
+        });
+      });
+    }
+
+    function startProgressLineMotion() {
+      const duration = 30000; // 30 sekundit
+      const minPos = -6;
+      const maxPos = 178;
+
+      function tick(now) {
+        const elapsed = now - progressStartAt;
+        const cycleProgress = Math.min(elapsed / duration, 1);
+
+        let pos;
+        if (progressDirection === 1) {
+          pos = minPos + (maxPos - minPos) * cycleProgress;
+        } else {
+          pos = maxPos - (maxPos - minPos) * cycleProgress;
+        }
+
+        nowPlayingFillEl.style.transform = `translateX(${pos}%)`;
+
+        if (cycleProgress >= 1) {
+          progressDirection = progressDirection === 1 ? -1 : 1;
+          progressStartAt = now;
+        }
+
+        progressAnimFrame = requestAnimationFrame(tick);
+      }
+
+      if (progressAnimFrame) {
+        cancelAnimationFrame(progressAnimFrame);
+      }
+
+      progressAnimFrame = requestAnimationFrame(tick);
+    }
+
+    function startAmbientWaves() {
+      const bars = document.querySelectorAll(".live-waves span");
+
+      function randomize() {
+        bars.forEach((bar, i) => {
+          const base = [8, 16, 12, 20, 14][i] || 12;
+          const variation = Math.random() * 10 - 5;
+          const height = Math.max(6, base + variation);
+          const speed = 0.8 + Math.random() * 0.6;
+
+          bar.style.height = height + "px";
+          bar.style.setProperty("--wave-speed", speed + "s");
+        });
+      }
+
+      randomize();
+      setInterval(randomize, 1800);
     }
 
     liveBtn.addEventListener("click", async () => {
@@ -724,6 +1060,10 @@
 
         const data = await res.json();
         const track = parseTrack(data);
+        const newTrackKey = `${track.artist}__${track.title}`;
+
+        const changed = newTrackKey !== currentTrackKey;
+        currentTrackKey = newTrackKey;
 
         artistEl.textContent = track.artist;
         titleEl.textContent = track.title;
@@ -738,6 +1078,11 @@
         if (isNews) {
           applyNewsTheme();
         }
+
+        if (changed) {
+          bumpNowPlaying();
+          resetProgressLine();
+        }
       } catch (e) {
         console.log("update error", e);
       }
@@ -745,6 +1090,10 @@
 
     updateLiveState();
     renderListenerIcons(0);
+    startBackgroundPulse();
+    startProgressLineMotion();
+    startAmbientWaves();
+    resetProgressLine();
     update();
     setInterval(update, 5000);
   </script>
